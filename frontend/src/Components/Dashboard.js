@@ -5,11 +5,8 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 //Registering the chart
 ChartJS.register(CategoryScale, LinearScale, Tooltip, Title, BarElement, Legend)
 
-const Dashboard = () => {
-    const [icon, setIcon] = useState(['🍽', '👚', '📽️', '🩺'])
-    const [budget, setBudget] = useState([500, 600, 800, 400])
-    const [spend, setSpend] = useState([400, 200, 100, 200])
-    const [category, setCategory] = useState(['Food', 'Clothes', 'Entertainment', 'Health'])
+const Dashboard = ({ icon, budget, spend, category }) => {
+
     let totalSpend = spend.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
     let totalBudget = budget.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 
@@ -110,8 +107,8 @@ const Dashboard = () => {
                 </div>
             </div>
             <div className='mt-4 row mb-5 g-3'>
-                <div className='col-12 col-md-6 col-lg-7 Card'>
-                    <div className="p-3">
+                <div className='col-12 col-md-6 col-lg-7'>
+                    <div className="p-3 Card">
                         <p className="font-monospace fs-5 fw-bold">Activity</p>
                         <Bar data={chartData} options={chartOptions} />
                     </div>
@@ -119,7 +116,7 @@ const Dashboard = () => {
                 <div className='col-12 col-md-6 col-lg-5 border'>
                     <div className="p-3">
                         <p className="fw-bold fs-5 font-monospace">Latest Budgets</p>
-                        <div className="row g-3 d-flex flex-row flex-1 justify-content-center">
+                        <div className="row g-3 d-flex flex-row flex-1 justify-content-center overflow-y-scroll" style={{ 'height': '20rem' }}>
                             {
                                 category.map((cat, index) => (
                                     <div key={index} className="col-12 card p-3 Card w-75">
@@ -130,12 +127,41 @@ const Dashboard = () => {
                                         </div>
                                         <div className="mt-2">
                                             <div className="progress">
-                                                <div className="progress-bar bg-warning" role="progressbar" aria-label="Basic example" style={{ "width": `${(spend[index] / budget[index]) * 100}%` }} aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                                <div className="progress-bar progress-bar-striped progress-bar-animated bg-warning" role="progressbar" aria-label="Basic example" style={{ "width": `${(spend[index] / budget[index]) * 100}%` }} aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
                                             </div>
                                         </div>
                                     </div>
                                 ))
                             }
+                        </div>
+                    </div>
+                </div>
+                <div className="mt-4 border">
+                    <div className="p-3">
+                        <p className="fs-5 fw-bold font-monospace">Latest Expense</p>
+                        <div className="mt-2">
+                            <table className="table table-striped table-hover table-bordered table-responsive">
+                                <thead className="table-primary">
+                                    <tr>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Amount</th>
+                                        <th scope="col">Date</th>
+                                        <th scope="col">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        category.map((cat, index) => (
+                                            <tr>
+                                                <th scope="row">{cat}</th>
+                                                <th>{spend[index]}</th>
+                                                <th>20 March 2024</th>
+                                                <th><button className="btn btn-warning">Delete</button></th>
+                                            </tr>
+                                        ))
+                                    }
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

@@ -1,26 +1,31 @@
 import { useState } from 'react';
 import Dashboard from './Dashboard';
 import { toast, ToastContainer } from 'react-toastify';
-import { Navigate } from 'react-router-dom';
+import Budget from './Budget';
+import Expenses from './Expenses';
 
 const HomePage = () => {
     const [page, setPage] = useState('Dashboard')
+    const [icon, setIcon] = useState(['🍽', '👚', '📽️', '🩺'])
+    const [budget, setBudget] = useState([500, 600, 800, 400])
+    const [spend, setSpend] = useState([400, 200, 100, 200])
+    const [category, setCategory] = useState(['Food', 'Clothes', 'Entertainment', 'Health'])
 
-    const handleLogout=()=>{
-        try{
+    const handleLogout = () => {
+        try {
             localStorage.removeItem('email')
             localStorage.removeItem('name')
             localStorage.removeItem('token')
             window.location.reload()
         }
-        catch(e){       
+        catch (e) {
             toast.error(e);
         }
     }
 
     return (
         <div className="container-fluid border mt-0">
-            <ToastContainer/>
+            <ToastContainer />
             <div className="row flex-wrap">
                 <div className="col-12 col-sm-4 col-md-3 col-lg-2 border">
                     <div className="container mt-4 d-flex justify-content-center align-items-center">
@@ -41,11 +46,17 @@ const HomePage = () => {
                 <div className="col-12 col-sm-8 col-md-9 col-lg-10 border">
                     {
                         page === 'Dashboard' ?
-                            <Dashboard />
+                            <Dashboard icon={icon} budget={budget} spend={spend} category={category} />
                             :
-                            <div className='d-flex justify-content-center align-items-center min-vh-100'>
-                                <p className='text-danger'>"Great things are on the way! Stay tuned, this feature is coming soon to help you manage your finances even better."</p>
-                            </div>
+                            page === 'Budgets' ?
+                                <Budget icon={icon} budget={budget} spend={spend} category={category} />
+                                :
+                                page === 'Expenses' ?
+                                    <Expenses />
+                                    :
+                                    <div className='d-flex justify-content-center align-items-center min-vh-100'>
+                                        <p className='text-danger'>"Great things are on the way! Stay tuned, this feature is coming soon to help you manage your finances even better."</p>
+                                    </div>
 
                     }
                 </div>

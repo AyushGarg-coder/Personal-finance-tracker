@@ -108,6 +108,47 @@ app.post('/checkAuth',async(req,res)=>{
     }
 })
 
+app.get('/expenses',async(req,res)=>{
+    try{
+        await client.connect()
+        const db=client.db(dbName)
+        const collection=db.collection('expenses')
+        const data=await collection.find().toArray()
+        res.status(200).json(data)
+    }
+    catch(e){
+        res.status(500).json('Oops! Server Error')
+    }
+    finally{
+        await client.close()
+    }
+})
+
+app.post('/addexpense',async(req,res)=>{
+    try{
+        const {name,amount,date}=req.body
+        
+        if (!name || !amount || !date) {
+            return res.status(400).json('Invalid expense data');
+        }
+
+        await client.connect();
+        const db = client.db(dbName);
+        const collection = db.collection('expenses');
+        const result=await collection.insertOne({ name, amount, date });
+        const insertedExpense = await collection.findOne({ _id: result.insertedId });
+        console.log(insertedExpense)
+        res.status(200).json({insertedExpense});
+    }
+    catch(e){
+        res.status(500).json("Oops! Server Error")
+    }
+    finally{
+        await client.close()
+    }
+})
+
+
 app.listen(3000,async()=>{
     console.log('Server started successfully')
 })
