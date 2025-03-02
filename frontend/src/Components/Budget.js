@@ -1,7 +1,14 @@
+import { useState } from "react"
 import BudgetCard from "./BudgetCard"
 
 
 const Budget = ({ icon, budget, spend, category }) => {
+const [budgetdata,setBudgetData]=useState({
+    name:'',
+    amount:'',
+    icon:''
+})
+
     return (
         <div className="">
             <div className="mt-3 border-bottom border-black">

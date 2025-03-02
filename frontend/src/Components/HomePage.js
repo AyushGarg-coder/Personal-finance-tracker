@@ -52,7 +52,7 @@ const HomePage = () => {
                                 <Budget icon={icon} budget={budget} spend={spend} category={category} />
                                 :
                                 page === 'Expenses' ?
-                                    <Expenses />
+                                    <Expenses categories={category}/>
                                     :
                                     <div className='d-flex justify-content-center align-items-center min-vh-100'>
                                         <p className='text-danger'>"Great things are on the way! Stay tuned, this feature is coming soon to help you manage your finances even better."</p>

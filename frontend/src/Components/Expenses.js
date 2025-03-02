@@ -39,13 +39,14 @@ import axios from 'axios'
 import { Modal, Button, Form } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 
-const Expenses = () => {
+const Expenses = ({categories}) => {
     const [expenses, setExpenses] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [newExpense, setNewExpense] = useState({
         name: '',
         amount: '',
         date: '',
+        category:'',
     });
 
     const handleChange = (e) => {
@@ -137,6 +138,24 @@ const Expenses = () => {
                         </Form.Group>
 
                         <Form.Group className="mb-3">
+                            <Form.Label>Category</Form.Label>
+                            <Form.Control
+                                as="select"
+                                name="category"
+                                value={newExpense.category}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">Select Category</option>
+                                {categories.map((category, index) => (
+                                    <option key={index} value={category}>
+                                        {category}
+                                    </option>
+                                ))}
+                            </Form.Control>
+                        </Form.Group>
+
+                        <Form.Group className="mb-3">
                             <Form.Label>Date</Form.Label>
                             <Form.Control
                                 type="date"
@@ -161,6 +180,7 @@ const Expenses = () => {
                         <tr>
                             <th scope="col">Name</th>
                             <th scope="col">Amount</th>
+                            <th scope="col">Category</th>
                             <th scope="col">Date</th>
                             <th scope="col">Action</th>
                         </tr>
@@ -170,6 +190,7 @@ const Expenses = () => {
                             <tr key={index}>
                                 <td>{expense.name}</td>
                                 <td>Rs. {expense.amount}</td>
+                                <td>{expense.category}</td>
                                 <td>{expense.date}</td>
                                 <td>
                                     <button className='btn btn-danger me-2'>🗑</button>
