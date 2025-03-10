@@ -12,13 +12,20 @@ const saltRounds = 10
 app.use(bodyparser.json())
 app.use(cors())
 const client = new MongoClient('mongodb://127.0.0.1/27017')
+let db
+client.connect()
+    .then(() => {
+        db = client.db(dbName)
+    })
+    .catch((e) => {
+        console.log(e.message)
+    })
 
 
 app.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body
-        await client.connect()
-        const db = client.db(dbName)
+
         const collection = db.collection('user-data')
         const data = await collection.findOne({ email: email })
         if (!data) {
@@ -44,9 +51,6 @@ app.post('/login', async (req, res) => {
     catch (e) {
         res.status(500).json(e)
     }
-    finally {
-        await client.close()
-    }
 })
 
 app.post('/signup', async (req, res) => {
@@ -58,8 +62,6 @@ app.post('/signup', async (req, res) => {
                     res.status(500).json(err)
                 }
                 else if (hash) {
-                    await client.connect()
-                    const db = client.db(dbName)
                     const collection = db.collection('user-data')
                     await collection.insertOne({ name: name, email: email, password: hash })
                     res.status(200).json('Data saved Successfully')
@@ -75,9 +77,6 @@ app.post('/signup', async (req, res) => {
     }
     catch (e) {
         res.status(500).json(e)
-    }
-    finally {
-        await client.close()
     }
 })
 
@@ -103,24 +102,19 @@ app.post('/checkAuth', async (req, res) => {
         // console.log(e)
         res.status(500).json("Oops! Server Error")
     }
-    finally {
-        await client.close()
-    }
 })
 
 app.get('/expenses', async (req, res) => {
     try {
-        await client.connect()
-        const db = client.db(dbName)
         const collection = db.collection('expenses')
         const data = await collection.find().toArray()
-        res.status(200).json(data)
+        const budgetCollection = db.collection('budgets')
+        const budgetData = await budgetCollection.find().toArray()
+        res.status(200).json({ data: data, budgets: budgetData })
     }
     catch (e) {
+        console.log(e)
         res.status(500).json('Oops! Server Error')
-    }
-    finally {
-        await client.close()
     }
 })
 
@@ -132,8 +126,6 @@ app.post('/addexpense', async (req, res) => {
             return res.status(400).json('Invalid expense data');
         }
 
-        await client.connect();
-        const db = client.db(dbName);
         const collection = db.collection('expenses');
 
         const result = await collection.insertOne({ name, amount, date, category });
@@ -143,9 +135,7 @@ app.post('/addexpense', async (req, res) => {
     catch (e) {
         res.status(500).json("Oops! Server Error")
     }
-    finally {
-        await client.close()
-    }
+
 })
 
 app.post('/updateExpense', async (req, res) => {
@@ -153,8 +143,7 @@ app.post('/updateExpense', async (req, res) => {
         const { _id, name, amount, date, category } = req.body
         if (_id && name && amount && date && category) {
             const objectid = new ObjectId(_id)
-            await client.connect()
-            const db = client.db(dbName)
+
             const collection = db.collection('expenses')
             await collection.updateOne({ _id: objectid }, { $set: { name, amount, date, category } })
             res.status(200).json('Updation Successfull')
@@ -166,9 +155,7 @@ app.post('/updateExpense', async (req, res) => {
     catch (e) {
         res.status(500).json('Internal Server Error')
     }
-    finally {
-        await client.close()
-    }
+
 })
 
 app.post('/deleteExpense', async (req, res) => {
@@ -176,8 +163,7 @@ app.post('/deleteExpense', async (req, res) => {
         const { id } = req.body
         if (id) {
             const objectid = new ObjectId(id)
-            await client.connect()
-            const db = client.db(dbName)
+
             const collection = db.collection('expenses')
             await collection.deleteOne({ _id: objectid })
             res.status(200).json("Data Deleted Successfully")
@@ -189,9 +175,7 @@ app.post('/deleteExpense', async (req, res) => {
     catch (e) {
         res.status(500).json('Internal Server Error')
     }
-    finally {
-        await client.close()
-    }
+
 })
 
 app.get('/getBudgetDetail', async (req, res) => {
@@ -206,7 +190,6 @@ app.get('/getBudgetDetail', async (req, res) => {
         const today = new Date()
         const currentMonth = today.getMonth() + 1
         const currentYear = today.getFullYear()
-        console.log(today, currentMonth, currentYear)
 
         //getting expenses with currentMonth and year
         const expenses = await expenseCollection.find({
@@ -216,44 +199,36 @@ app.get('/getBudgetDetail', async (req, res) => {
             }
         }).toArray();
 
-        console.log(expenses)
-
         //getting totalspend data
         const categorySpend = budgets.map(budget => {
             const categoryExpenses = expenses.filter(expense => expense.category === budget.name)
             const totalSpend = categoryExpenses.reduce((acc, data) => acc + parseFloat(data.amount), 0);
-            const totalitems=categoryExpenses.length
-            console.log("categoryexpenses",categoryExpenses)
+            const totalitems = categoryExpenses.length
             return {
                 // items:categoryExpenses[0].name,
                 name: budget.name,
                 amount: budget.amount,
                 icon: budget.icon,
                 // spendamt:categoryExpenses[0].amount,
-                spend: totalSpend ,
-                item_count:totalitems,
+                spend: totalSpend,
+                item_count: totalitems,
                 // dates:categoryExpenses[0].date
             };
         })
-
-        console.log(categorySpend)
 
         res.status(200).json(categorySpend)
     }
     catch (e) {
         res.status(500).json(e)
     }
-    finally {
-        await client.close()
-    }
+
 })
 
 app.post('/addBudget', async (req, res) => {
     try {
         const { name, amount, icon } = req.body
         if (name && amount && icon) {
-            await client.connect()
-            const db = client.db(dbName)
+
             const collection = db.collection('budgets')
             await collection.insertOne({ name, amount, icon })
             res.status(200).json("Data Saved Successfully")
@@ -262,9 +237,7 @@ app.post('/addBudget', async (req, res) => {
     catch (e) {
         res.status(500).json('Internal Server Error')
     }
-    finally {
-        await client.close()
-    }
+
 })
 
 app.listen(3000, async () => {

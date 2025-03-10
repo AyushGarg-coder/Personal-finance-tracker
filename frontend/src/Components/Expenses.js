@@ -39,7 +39,8 @@ import axios from 'axios'
 import { Modal, Button, Form } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 
-const Expenses = ({ categories }) => {
+const Expenses = () => {
+    const [budget, setBudget] = useState([])
     const [expenses, setExpenses] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [isEditing, setEditState] = useState(false)
@@ -116,19 +117,19 @@ const Expenses = ({ categories }) => {
         }
     }
 
-    const handledelete=async(index,data)=>{
-        try{
-            const response=await axios.post('http://localhost:3000/deleteExpense',{id:expenses[index]._id})
-            if(response.status===200){
-                const updatedExpense=expenses.filter((expense,i)=>i!=index)
+    const handledelete = async (index, data) => {
+        try {
+            const response = await axios.post('http://localhost:3000/deleteExpense', { id: expenses[index]._id })
+            if (response.status === 200) {
+                const updatedExpense = expenses.filter((expense, i) => i != index)
                 setExpenses(updatedExpense)
                 toast.success("Data Deleted Successfully")
             }
-            else{
+            else {
                 toast.error('Data Deletion Failed')
             }
         }
-        catch(e){
+        catch (e) {
             toast.error(e)
         }
     }
@@ -138,7 +139,8 @@ const Expenses = ({ categories }) => {
             try {
                 const response = await axios.get('http://localhost:3000/expenses')
                 if (response.status === 200) {
-                    setExpenses(response.data)
+                    setExpenses(response.data.data)
+                    setBudget(response.data.budgets)
                 }
             }
             catch (e) {
@@ -201,11 +203,14 @@ const Expenses = ({ categories }) => {
                                 required
                             >
                                 <option value="">Select Category</option>
-                                {categories.map((category, index) => (
-                                    <option key={index} value={category}>
-                                        {category}
-                                    </option>
-                                ))}
+                                {
+                                    budget.map((item, index) => (
+                                        <option key={index} value={item.name}>
+                                            {item.name}
+                                        </option>
+                                    ))
+                                }
+
                             </Form.Control>
                         </Form.Group>
 
@@ -248,7 +253,7 @@ const Expenses = ({ categories }) => {
                                 <td>{expense.date}</td>
                                 <td className='d-flex gap-2'>
                                     <button className='btn btn-warning' onClick={() => handleEdit(expense, index)}>🖍</button>
-                                    <button className='btn btn-danger' onClick={()=>handledelete(index,expense)}>🗑</button>
+                                    <button className='btn btn-danger' onClick={() => handledelete(index, expense)}>🗑</button>
                                 </td>
                             </tr>
                         ))}

@@ -2,6 +2,9 @@ import '../App.css'
 const BudgetCard = ({icon,budget,spend,category,items}) => {
     return (
         <div className="col-12 col-sm-12 col-md-4 col-lg-4">
+            {
+                console.log("",budget,spend)
+            }
             <div className='card Card p-3'>
                 <div className='d-flex flex-1 flex-row justify-content-between'>
                     <p className='fs-4'>{icon}</p>
@@ -17,7 +20,7 @@ const BudgetCard = ({icon,budget,spend,category,items}) => {
                         <p className='fs-6 fw-medium'>Remaining: Rs. {budget-spend}</p>
                     </div>
                     <div className='progress'>
-                        <div className='progress-bar progress-bar-striped progress-bar-animated' role="progress-bar" aria-label='Basic Example' aria-valuenow='25' aria-valuemin='0' aria-valuemax='100' style={{ 'width': `${spend/budget*100}%` }}></div>
+                        <div className='progress-bar progress-bar-striped progress-bar-animated' role="progress-bar" aria-label='Basic Example' aria-valuenow='25' aria-valuemin='0' aria-valuemax='100' style={{ 'width': `${spend/budget*100}%` }}>{`${((spend/budget)*100).toFixed(0)}%`}</div>
                     </div>
                 </div>
             </div>

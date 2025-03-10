@@ -66,7 +66,7 @@ const HomePage = () => {
                 <div className="col-12 col-sm-8 col-md-9 col-lg-10 border">
                     {
                         page === 'Dashboard' ?
-                            <Dashboard icon={icon} budget={budget} spend={spend} category={category} item={item} />
+                            <Dashboard/>
                             :
                             page === 'Budgets' ?
                                 <Budget />
