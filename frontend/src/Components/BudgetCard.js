@@ -1,8 +1,5 @@
-import { useState } from 'react'
 import '../App.css'
-
-
-const BudgetCard = ({icon,budget,spend,category}) => {
+const BudgetCard = ({icon,budget,spend,category,items}) => {
     return (
         <div className="col-12 col-sm-12 col-md-4 col-lg-4">
             <div className='card Card p-3'>
@@ -10,7 +7,7 @@ const BudgetCard = ({icon,budget,spend,category}) => {
                     <p className='fs-4'>{icon}</p>
                     <div className='text-center'>
                         <p className='mb-0 fs-5 fw-bold'>{category}</p>
-                        <p className='mt-0'>0 items</p>
+                        <p className='mt-0'>{items} items</p>
                     </div>
                     <p className='fw-bold fs-5 text-success'>Rs {budget}</p>
                 </div>

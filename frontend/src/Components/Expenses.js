@@ -39,14 +39,17 @@ import axios from 'axios'
 import { Modal, Button, Form } from 'react-bootstrap';
 import { toast } from 'react-toastify';
 
-const Expenses = ({categories}) => {
+const Expenses = ({ categories }) => {
     const [expenses, setExpenses] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const [isEditing, setEditState] = useState(false)
+    const [index, setIndex] = useState(-1)
     const [newExpense, setNewExpense] = useState({
+        id: '',
         name: '',
         amount: '',
         date: '',
-        category:'',
+        category: '',
     });
 
     const handleChange = (e) => {
@@ -56,29 +59,79 @@ const Expenses = ({categories}) => {
         });
     };
 
-    const handleShow = () => setShowModal(true);
+    const handleShow = () => {
+        setEditState(false);
+        setNewExpense(
+            {
+                id: '',
+                name: '',
+                amount: '',
+                date: '',
+                category: '',
+            }
+        )
+        setShowModal(true)
+    };
     const handleClose = () => setShowModal(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        // Post the new expense data to the backend
         try {
-            const response = await axios.post('http://localhost:3000/addexpense', newExpense)
+            if (isEditing) {
+                const response = await axios.post('http://localhost:3000/updateExpense', newExpense)
+                if (response.status === 200) {
+                    expenses[index] = newExpense
+                    setEditState(false)
+                    setShowModal(false)
+                    setIndex(-1)
+                    toast.success("Data Updated Successfully")
+                }
+            }
+            else {
+                const response = await axios.post('http://localhost:3000/addexpense', newExpense)
 
-            if (response.status === 200) {
-                const data = response.data.insertedExpense;
-                console.log(response)
-                setExpenses([...expenses, data]); // Add the new expense to the list
-                handleClose(); // Close the modal after adding the expense
-                setNewExpense({ name: '', amount: '', date: '' }); // Clear the form
-            } else {
-                alert('Failed to add expense');
+                if (response.status === 200) {
+                    const data = response.data.insertedExpense;
+                    setExpenses([...expenses, data]);
+                    handleClose();
+                    setNewExpense({ name: '', amount: '', date: '', category: '' });
+                } else {
+                    alert('Failed to add expense');
+                }
             }
         } catch (e) {
             toast.error(e)
         }
     };
+
+    const handleEdit = (data, index) => {
+        try {
+            setEditState(true);
+            setIndex(index)
+            setNewExpense(expenses[index])
+            setShowModal(true)
+        }
+        catch (e) {
+            toast.error(e)
+        }
+    }
+
+    const handledelete=async(index,data)=>{
+        try{
+            const response=await axios.post('http://localhost:3000/deleteExpense',{id:expenses[index]._id})
+            if(response.status===200){
+                const updatedExpense=expenses.filter((expense,i)=>i!=index)
+                setExpenses(updatedExpense)
+                toast.success("Data Deleted Successfully")
+            }
+            else{
+                toast.error('Data Deletion Failed')
+            }
+        }
+        catch(e){
+            toast.error(e)
+        }
+    }
 
     useEffect(() => {
         const fetchExpense = async () => {
@@ -98,7 +151,7 @@ const Expenses = ({categories}) => {
     return (
         <div className="col">
             <div className="mt-3 border-bottom border-black">
-                <p className="alert alert-warning text-center fw-bold fs-1 font-monospace">My Expenses</p>
+                <p className="alert alert-warning text-center fw-bold fs-1 font-monospace text-wrap">My Expenses</p>
             </div>
             <div className="mt-2 d-flex flex-row justify-content-end">
                 <button className="btn btn-primary" onClick={handleShow}>
@@ -109,7 +162,7 @@ const Expenses = ({categories}) => {
             {/* Modal for Adding New Expense */}
             <Modal show={showModal} onHide={handleClose}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Add New Expense</Modal.Title>
+                    <Modal.Title>{isEditing ? 'Edit Expense' : 'Add New Expense'}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form onSubmit={handleSubmit}>
@@ -133,6 +186,7 @@ const Expenses = ({categories}) => {
                                 name="amount"
                                 value={newExpense.amount}
                                 onChange={handleChange}
+                                min={1}
                                 required
                             />
                         </Form.Group>
@@ -167,14 +221,14 @@ const Expenses = ({categories}) => {
                         </Form.Group>
 
                         <Button variant="primary" type="submit">
-                            Add Expense
+                            {isEditing ? 'Save' : 'Add Expense'}
                         </Button>
                     </Form>
                 </Modal.Body>
             </Modal>
 
             {/* Expenses Table */}
-            <div className="mt-2">
+            <div className="mt-2 overflow-x-auto text-break">
                 <table className="table table-bordered table-responsive table-striped table-hover">
                     <thead className="table-primary">
                         <tr>
@@ -186,15 +240,15 @@ const Expenses = ({categories}) => {
                         </tr>
                     </thead>
                     <tbody>
-                        {expenses.map((expense, index) => (
+                        {expenses && expenses.map((expense, index) => (
                             <tr key={index}>
                                 <td>{expense.name}</td>
                                 <td>Rs. {expense.amount}</td>
                                 <td>{expense.category}</td>
                                 <td>{expense.date}</td>
-                                <td>
-                                    <button className='btn btn-danger me-2'>🗑</button>
-                                    <button className='btn btn-warning ms-2'>🖍</button>
+                                <td className='d-flex gap-2'>
+                                    <button className='btn btn-warning' onClick={() => handleEdit(expense, index)}>🖍</button>
+                                    <button className='btn btn-danger' onClick={()=>handledelete(index,expense)}>🗑</button>
                                 </td>
                             </tr>
                         ))}

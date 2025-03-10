@@ -1,19 +1,43 @@
 import { useEffect, useState } from "react"
 import { Bar } from 'react-chartjs-2'
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, plugins } from 'chart.js';
+import axios from "axios";
+import { toast } from "react-toastify";
 
 //Registering the chart
 ChartJS.register(CategoryScale, LinearScale, Tooltip, Title, BarElement, Legend)
 
-const Dashboard = ({ icon, budget, spend, category }) => {
-
-    let totalSpend = spend.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-    let totalBudget = budget.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-
+const Dashboard = () => {
+    const[data,setData]=useState([])
+    const [expenses,setExpenses]=useState([])
+    
     useEffect(() => {
-        //making request for fetching data for budgets and spends based on categories
+        const fetchdata = async () => {
+            try {
+                const response = await axios.get('http://localhost:3000/getBudgetDetail')
+                const result=await axios.get('http://localhost:3000/expenses')
+                if (response.status === 200 && result.status===200) {
+                    setData(response.data)
+                    setExpenses(result.data)
+                }
+            }
+            catch (e) {
+                toast.error(e.message || 'Internal Server Error')
+            }
+        }
+        fetchdata();
     }, [])
+    
+    // Extracting data from the array of objects
+    const category = data.map(item => item.name);
+    const budget = data.map(item => item.amount);
+    const spend = expenses.map(item => item.amount);
+    const icon = data.map(item => item.icon);  
+    const budgetsize=data.length
 
+    
+    let totalSpend = spend.reduce((accumulator, currentValue) => accumulator + parseFloat(currentValue), 0);
+    let totalBudget = budget.reduce((accumulator, currentValue) => accumulator + parseFloat(currentValue), 0);
     const chartOptions = {
         responsive: true,
         scales: {
@@ -87,7 +111,7 @@ const Dashboard = ({ icon, budget, spend, category }) => {
                     <div className="text-center d-flex flex-row mx-auto" >
                         <div className=" me-3">
                             <p className="fw-medium fs-6 text-dark-emphasis mb-0 font-monospace">No. of Budgets</p>
-                            <p className="fw-bold fs-5 text-dark mt-0">{budget.length}</p>
+                            <p className="fw-bold fs-5 text-dark mt-0">{budgetsize}</p>
                         </div>
                         <div className="">
                             <p className="fs-1">🔢</p>
@@ -144,19 +168,21 @@ const Dashboard = ({ icon, budget, spend, category }) => {
                                 <thead className="table-primary">
                                     <tr>
                                         <th scope="col">Name</th>
+                                        <th scope="col">Category</th>
                                         <th scope="col">Amount</th>
                                         <th scope="col">Date</th>
-                                        <th scope="col">Action</th>
+                                        {/* <th scope="col">Action</th> */}
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="">
                                     {
-                                        category.map((cat, index) => (
-                                            <tr>
-                                                <th scope="row">{cat}</th>
-                                                <th>{spend[index]}</th>
-                                                <th>20 March 2024</th>
-                                                <th><button className="btn btn-warning">Delete</button></th>
+                                        expenses.map((data, index) => (
+                                            <tr key={index}>
+                                                <th scope="row">{data.name}</th>
+                                                <th>{data.category}</th>
+                                                <th>{data.amount}</th>
+                                                <th>{data.date}</th>
+                                                {/* <th><button className="btn btn-warning">Delete</button></th> */}
                                             </tr>
                                         ))
                                     }

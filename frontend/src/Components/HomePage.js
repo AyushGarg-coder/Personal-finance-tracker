@@ -1,15 +1,35 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Dashboard from './Dashboard';
 import { toast, ToastContainer } from 'react-toastify';
 import Budget from './Budget';
 import Expenses from './Expenses';
+import axios from 'axios';
 
 const HomePage = () => {
     const [page, setPage] = useState('Dashboard')
-    const [icon, setIcon] = useState(['🍽', '👚', '📽️', '🩺'])
-    const [budget, setBudget] = useState([500, 600, 800, 400])
-    const [spend, setSpend] = useState([400, 200, 100, 200])
-    const [category, setCategory] = useState(['Food', 'Clothes', 'Entertainment', 'Health'])
+    const [data, setData] = useState([])
+    
+    useEffect(()=>{
+        const fetchdata=async()=>{
+            try{
+                const response=await axios.get('http://localhost:3000/getBudgetDetail')
+                if(response.status===200){
+                    setData(response.data)
+                }
+            }
+            catch(e){
+                toast.error(e.message||'Internal Server Error')
+            }
+        }
+        fetchdata();
+    },[])
+
+    // Extracting data from the array of objects
+    const category = data.map(item => item.name);
+    const budget = data.map(item => item.amount);
+    const spend = data.map(item => item.spendamt);
+    const icon = data.map(item => item.icon);
+    const item=data.map(item=>item.items);
 
     const handleLogout = () => {
         try {
@@ -46,10 +66,10 @@ const HomePage = () => {
                 <div className="col-12 col-sm-8 col-md-9 col-lg-10 border">
                     {
                         page === 'Dashboard' ?
-                            <Dashboard icon={icon} budget={budget} spend={spend} category={category} />
+                            <Dashboard icon={icon} budget={budget} spend={spend} category={category} item={item} />
                             :
                             page === 'Budgets' ?
-                                <Budget icon={icon} budget={budget} spend={spend} category={category} />
+                                <Budget />
                                 :
                                 page === 'Expenses' ?
                                     <Expenses categories={category}/>
