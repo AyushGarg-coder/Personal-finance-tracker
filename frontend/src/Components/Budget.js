@@ -66,7 +66,11 @@ const Budget = () => {
                 toast.success(response.data);
             }
         } catch (e) {
-            toast.error(e.message || 'An error occurred while adding the budget');
+            // console.log(e)
+            toast.error(e.response.data||e.message || 'An error occurred while adding the budget');
+            if(e.response.data){
+                handleClose();
+            }
         }
     }
 

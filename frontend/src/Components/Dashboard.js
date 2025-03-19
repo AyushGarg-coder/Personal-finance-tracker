@@ -133,18 +133,29 @@ const Dashboard = () => {
             {
                 label: 'Spend by Category',
                 data: aggregatedSpend,
-                backgroundColor: [
-                    'rgba(255, 159, 64, 0.6)',  // Orange
-                    'rgba(54, 162, 235, 0.6)',  // Blue
-                    'rgba(255, 99, 132, 0.6)',  // Red
-                    'rgba(75, 192, 192, 0.6)',  // Green
-                    'rgba(153, 102, 255, 0.6)', // Purple
-                    'rgba(255, 159, 64, 0.6)'   // Yellow
-                ],
+                backgroundColor: generatebackgroundcolor(category.length),
                 borderColor: 'rgba(255, 255, 255, 1)', // White border
                 borderWidth: 2
             }
         ]
+    }
+
+    function generatebackgroundcolor(numCategories) {
+        let backgroundcolor = [];
+
+        for (let i = 0; i < numCategories; i++) {
+            backgroundcolor.push(randomColor());
+        }
+        return backgroundcolor;
+    }
+    // Function to generate a random color in rgba format
+    function randomColor() {
+        const r = Math.floor(Math.random() * 256);
+        const g = Math.floor(Math.random() * 256);
+        const b = Math.floor(Math.random() * 256);
+        const a = 0.6;  // Set the alpha value to make the color semi-transparent
+
+        return `rgba(${r}, ${g}, ${b}, ${a})`;
     }
 
     const lineChartData = {
@@ -248,25 +259,27 @@ const Dashboard = () => {
                 </div>
 
                 <div className='col-12 col-md-6 col-lg-6 border'>
-                    <div className="p-3">
+                    <div className="p-3" style={{ 'height': '8rem' }}>
                         <p className="fw-bold fs-5 font-monospace">Latest Budgets</p>
-                        <div className="row g-3 d-flex flex-row flex-1 justify-content-center overflow-y-scroll">
-                            {
-                                category.map((cat, index) => (
-                                    <div key={index} className="col-12 card p-3 Card w-75">
-                                        <div className="d-flex flex-row flex-1 flex-wrap justify-content-between">
-                                            <p className="fs-4">{icon[index]}</p>
-                                            <p className="fs-5 fw-bold">{cat}</p>
-                                            <p className="fw-bold fs-5 text-success">Rs. {budget[index]}</p>
-                                        </div>
-                                        <div className="mt-2">
-                                            <div className="progress">
-                                                <div className="progress-bar progress-bar-striped progress-bar-animated bg-warning text-black" role="progressbar" aria-label="Basic example" style={{ "width": `${(spendData[index] / budget[index]) * 100 || 0}%` }} aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">{`${((spendData[index] / budget[index]) * 100).toFixed(0)} ` || '0'}%</div>
+                        <div className="overflow-y-scroll overflow-x-hidden" style={{ 'height': '600%' }}>
+                            <div className="row g-3 d-flex flex-row flex-1 justify-content-center">
+                                {
+                                    category.map((cat, index) => (
+                                        <div key={index} className="col-12 card p-3 Card w-75">
+                                            <div className="d-flex flex-row flex-1 flex-wrap justify-content-between">
+                                                <p className="fs-4">{icon[index]}</p>
+                                                <p className="fs-5 fw-bold">{cat}</p>
+                                                <p className="fw-bold fs-5 text-success">Rs. {budget[index]}</p>
+                                            </div>
+                                            <div className="mt-2">
+                                                <div className="progress">
+                                                    <div className="progress-bar progress-bar-striped progress-bar-animated bg-warning text-black" role="progressbar" aria-label="Basic example" style={{ "width": `${(spendData[index] / budget[index]) * 100 || 0}%` }} aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">{`${((spendData[index] / budget[index]) * 100).toFixed(0)} ` || '0'}%</div>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))
-                            }
+                                    ))
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>

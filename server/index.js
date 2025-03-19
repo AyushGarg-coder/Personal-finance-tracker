@@ -230,8 +230,17 @@ app.post('/addBudget', async (req, res) => {
         if (name && amount && icon) {
 
             const collection = db.collection('budgets')
-            await collection.insertOne({ name, amount, icon })
-            res.status(200).json("Data Saved Successfully")
+            const data=collection.findOne({name:name})
+            if(data)
+            {
+                res.status(409).json("Data Already Exists")
+            }
+            else
+            {
+
+                await collection.insertOne({ name, amount, icon })
+                res.status(200).json("Data Saved Successfully")
+            }
         }
     }
     catch (e) {
