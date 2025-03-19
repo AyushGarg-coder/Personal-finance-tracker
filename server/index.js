@@ -1,5 +1,6 @@
 const express = require('express')
 const cors = require('cors')
+require('dotenv').config()
 const bodyparser = require('body-parser')
 const bcyrpt = require('bcrypt')
 const jwt = require('jsonwebtoken')
@@ -11,7 +12,7 @@ const saltRounds = 10
 
 app.use(bodyparser.json())
 app.use(cors())
-const client = new MongoClient('mongodb://127.0.0.1/27017')
+const client = new MongoClient(process.env.db_url)
 let db
 client.connect()
     .then(() => {
@@ -85,7 +86,7 @@ app.post('/checkAuth', async (req, res) => {
         const { email, token } = req.body
 
         if (email, token) {
-            jwt.verify(token, "cat", (err, result) => {
+            jwt.verify(token, process.env.jwt_secret_key, (err, result) => {
                 if (err) {
                     res.status(400).json('Invalid Token')
                 }
@@ -230,8 +231,8 @@ app.post('/addBudget', async (req, res) => {
         if (name && amount && icon) {
 
             const collection = db.collection('budgets')
-            const data=collection.findOne({name:name})
-            if(data)
+            const data=await collection.findOne({name:name})
+            if(data&&data.name==name)
             {
                 res.status(409).json("Data Already Exists")
             }
